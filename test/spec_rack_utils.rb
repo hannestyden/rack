@@ -541,6 +541,22 @@ context "Rack::Utils::Multipart" do
     req.POST['param'][:tempfile].should.equal "with-content-type"
   end
 
+  specify "should handle larger files" do
+    req =
+      Rack::Request.new(Rack::MockRequest.env_for(
+        "/", multipart_fixture('large_file')))
+
+    req.POST['other'].should.equal "text"
+  end
+
+  specify "should the python test case" do
+    req =
+      Rack::Request.new(Rack::MockRequest.env_for(
+        "/", multipart_fixture('python')))
+
+    req.POST['other'][:tempfile].should.equal "with-content-type"
+  end
+
   private
     def multipart_fixture(name)
       file = multipart_file(name)

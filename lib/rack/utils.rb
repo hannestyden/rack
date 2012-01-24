@@ -543,7 +543,7 @@ module Rack
                   end
                 end
 
-                if content_type || filename
+                if filename
                   body = Tempfile.new("RackMultipart")
                   body.binmode  if body.respond_to?(:binmode)
                 end
@@ -586,7 +586,7 @@ module Rack
               data = {:filename => filename, :type => content_type,
                       :name => name, :tempfile => body, :head => head}
             elsif !filename && content_type
-              body.rewind
+              body.rewind if body.respond_to?(:rewind)
 
               # Generic multipart cases, not coming from a form
               data = {:type => content_type,

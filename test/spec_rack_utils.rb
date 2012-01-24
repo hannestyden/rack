@@ -533,6 +533,14 @@ context "Rack::Utils::Multipart" do
       message.should.equal "value must be a Hash"
   end
 
+  specify "should not parse text fields with charset as files" do
+    req =
+      Rack::Request.new(Rack::MockRequest.env_for(
+        "/", multipart_fixture('text_with_content_type')))
+
+    req.POST['param'][:tempfile].should.equal "with-content-type"
+  end
+
   private
     def multipart_fixture(name)
       file = multipart_file(name)

@@ -1,0 +1,10 @@
+--AaB03x
+Content-Disposition: form-data; name="param"
+
+without-content-type
+--AaB03x
+Content-Disposition: form-data; name="param"
+Content-Type: text/plain; charset=utf-8
+
+with-content-type
+--AaB03x--

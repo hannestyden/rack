@@ -154,15 +154,16 @@ describe Rack::Multipart do
   end
 
   should "parse multipart upload with text file with no name field" do
+    # Ouch!
     env = Rack::MockRequest.env_for("/", multipart_fixture(:filename_and_no_name))
     params = Rack::Multipart.parse_multipart(env)
-    params["file1.txt"][:type].should.equal "text/plain"
-    params["file1.txt"][:filename].should.equal "file1.txt"
-    params["file1.txt"][:head].should.equal "Content-Disposition: form-data; " +
-      "filename=\"file1.txt\"\r\n" +
+    params["file1txt"][:type].should.equal "text/plain"
+    params["file1txt"][:filename].should.equal "file1txt"
+    params["file1txt"][:head].should.equal "Content-Disposition: form-data; " +
+      "filename=\"file1txt\"\r\n" +
       "Content-Type: text/plain\r\n"
-    params["file1.txt"][:name].should.equal "file1.txt"
-    params["file1.txt"][:tempfile].read.should.equal "contents"
+    params["file1txt"][:name].should.equal "file1txt"
+    params["file1txt"][:tempfile].read.should.equal "contents"
   end
 
   should "parse multipart upload with nested parameters" do
@@ -172,9 +173,9 @@ describe Rack::Multipart do
     params["foo"]["files"][:type].should.equal "text/plain"
     params["foo"]["files"][:filename].should.equal "file1.txt"
     params["foo"]["files"][:head].should.equal "Content-Disposition: form-data; " +
-      "name=\"foo[files]\"; filename=\"file1.txt\"\r\n" +
+      "name=\"foo.files\"; filename=\"file1.txt\"\r\n" +
       "Content-Type: text/plain\r\n"
-    params["foo"]["files"][:name].should.equal "foo[files]"
+    params["foo"]["files"][:name].should.equal "foo.files"
     params["foo"]["files"][:tempfile].read.should.equal "contents"
   end
 
@@ -343,11 +344,11 @@ describe Rack::Multipart do
     files[:type].should.equal "image/jpeg"
     files[:filename].should.equal "100% of a photo.jpeg"
     files[:head].should.equal <<-MULTIPART
-Content-Disposition: form-data; name="document[attachment]"; filename="100% of a photo.jpeg"\r
+Content-Disposition: form-data; name="document.attachment"; filename="100% of a photo.jpeg"\r
 Content-Type: image/jpeg\r
     MULTIPART
 
-    files[:name].should.equal "document[attachment]"
+    files[:name].should.equal "document.attachment"
     files[:tempfile].read.should.equal "contents"
   end
 
@@ -358,11 +359,11 @@ Content-Type: image/jpeg\r
     files[:type].should.equal "image/jpeg"
     files[:filename].should.equal "100%a"
     files[:head].should.equal <<-MULTIPART
-Content-Disposition: form-data; name="document[attachment]"; filename="100%a"\r
+Content-Disposition: form-data; name="document.attachment"; filename="100%a"\r
 Content-Type: image/jpeg\r
     MULTIPART
 
-    files[:name].should.equal "document[attachment]"
+    files[:name].should.equal "document.attachment"
     files[:tempfile].read.should.equal "contents"
   end
 
@@ -373,11 +374,11 @@ Content-Type: image/jpeg\r
     files[:type].should.equal "image/jpeg"
     files[:filename].should.equal "100%"
     files[:head].should.equal <<-MULTIPART
-Content-Disposition: form-data; name="document[attachment]"; filename="100%"\r
+Content-Disposition: form-data; name="document.attachment"; filename="100%"\r
 Content-Type: image/jpeg\r
     MULTIPART
 
-    files[:name].should.equal "document[attachment]"
+    files[:name].should.equal "document.attachment"
     files[:tempfile].read.should.equal "contents"
   end
 
@@ -418,6 +419,7 @@ Content-Type: image/jpeg\r
     }
     env = Rack::MockRequest.env_for("/", options)
     params = Rack::Multipart.parse_multipart(env)
+
     params["people"][0]["submit-name"].should.equal "Larry"
     params["people"][0]["files"][:filename].should.equal "file1.txt"
     params["people"][0]["files"][:tempfile].read.should.equal "contents"
@@ -431,7 +433,7 @@ Content-Type: image/jpeg\r
                       "CONTENT_LENGTH" => input.size,
                       :input => input)
 
-    req.POST['file.path'].should.equal "/var/tmp/uploads/4/0001728414"
+    req.POST['file:path'].should.equal "/var/tmp/uploads/4/0001728414"
     req.POST['addresses'].should.not.equal nil
   end
 

@@ -212,23 +212,23 @@ Content-Disposition: form-data; name="ccccccc"
 
 ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 --1yy3laWhgX31qpiHinh67wJXqKalukEUTvqTzmon
-Content-Disposition: form-data; name="file.name"
+Content-Disposition: form-data; name="file:name"
 
 INPUTMSG.gz
 --1yy3laWhgX31qpiHinh67wJXqKalukEUTvqTzmon
-Content-Disposition: form-data; name="file.content_type"
+Content-Disposition: form-data; name="file:content_type"
 
 application/octet-stream
 --1yy3laWhgX31qpiHinh67wJXqKalukEUTvqTzmon
-Content-Disposition: form-data; name="file.path"
+Content-Disposition: form-data; name="file:path"
 
 /var/tmp/uploads/4/0001728414
 --1yy3laWhgX31qpiHinh67wJXqKalukEUTvqTzmon
-Content-Disposition: form-data; name="file.md5"
+Content-Disposition: form-data; name="file:md5"
 
 aa73198feb4b4c1c3186f5e7466cbbcc
 --1yy3laWhgX31qpiHinh67wJXqKalukEUTvqTzmon
-Content-Disposition: form-data; name="file.size"
+Content-Disposition: form-data; name="file:size"
 
 13212
 --1yy3laWhgX31qpiHinh67wJXqKalukEUTvqTzmon

@@ -4,6 +4,7 @@ require 'set'
 require 'tempfile'
 require 'rack/multipart'
 require 'time'
+require 'English'
 
 major, minor, patch = RUBY_VERSION.split('.').map { |v| v.to_i }
 
@@ -120,21 +121,21 @@ module Rack
     # the structural types represented by two different parameter names are in
     # conflict, a ParameterTypeError is raised.
     def normalize_params(params, name, v = nil)
-      name =~ %r(\A[\[\]]*([^\[\]]+)\]*)
+      name =~ %r{\A([^.]*)}
       k = $1 || ''
-      after = $' || ''
+      after = $POSTMATCH || ''
 
       return if k.empty?
 
       if after == ""
         params[k] = v
-      elsif after == "["
+      elsif after == "."
         params[name] = v
-      elsif after == "[]"
+      elsif after == ".."
         params[k] ||= []
         raise ParameterTypeError, "expected Array (got #{params[k].class.name}) for param `#{k}'" unless params[k].is_a?(Array)
         params[k] << v
-      elsif after =~ %r(^\[\]\[([^\[\]]+)\]$) || after =~ %r(^\[\](.+)$)
+      elsif after =~ %r{^\.\.(.*)}
         child_key = $1
         params[k] ||= []
         raise ParameterTypeError, "expected Array (got #{params[k].class.name}) for param `#{k}'" unless params[k].is_a?(Array)
@@ -144,6 +145,7 @@ module Rack
           params[k] << normalize_params(params.class.new, child_key, v)
         end
       else
+        after = after.sub(/^\.*/, '')
         params[k] ||= params.class.new
         raise ParameterTypeError, "expected Hash (got #{params[k].class.name}) for param `#{k}'" unless params_hash_type?(params[k])
         params[k] = normalize_params(params[k], after, v)
@@ -173,11 +175,12 @@ module Rack
       case value
       when Array
         value.map { |v|
-          build_nested_query(v, "#{prefix}[]")
+          build_nested_query(v, "#{prefix}..")
         }.join("&")
       when Hash
         value.map { |k, v|
-          build_nested_query(v, prefix ? "#{prefix}[#{escape(k)}]" : escape(k))
+          p = prefix.to_s.sub(/(\w)$/, '\1.')
+          build_nested_query(v, "#{p}#{escape(k)}")
         }.reject(&:empty?).join('&')
       when nil
         prefix
@@ -187,6 +190,23 @@ module Rack
       end
     end
     module_function :build_nested_query
+
+    # def build_nested_query(value, prefix = nil)
+    #   case value
+    #   when Array
+    #     value.map { |v|
+    #       build_nested_query(v, "#{prefix}..")
+    #     }.join("&")
+    #   when Hash
+    #     value.map { |k, v|
+    #       p = prefix.to_s.sub(/(\w)$/, '\1.')
+    #       build_nested_query(v, "#{p}#{escape(k)}")
+    #     }.join("&")
+    #   else
+    #     raise ArgumentError, "value must be a Hash" if prefix.nil?
+    #     "#{prefix}=#{escape(value)}"
+    #   end
+    # end
 
     def q_values(q_value_header)
       q_value_header.to_s.split(/\s*,\s*/).map do |part|

@@ -149,17 +149,17 @@ describe Rack::MockRequest do
     env = YAML.load(res.body)
     env["REQUEST_METHOD"].should.equal "GET"
     env["QUERY_STRING"].should.include "baz=2"
-    env["QUERY_STRING"].should.include "foo[bar]=1"
+    env["QUERY_STRING"].should.include "foo.bar=1"
     env["PATH_INFO"].should.equal "/foo"
     env["mock.postdata"].should.equal ""
   end
 
   should "accept raw input in params for GET requests" do
-    res = Rack::MockRequest.new(app).get("/foo?baz=2", :params => "foo[bar]=1")
+    res = Rack::MockRequest.new(app).get("/foo?baz=2", :params => "foo.bar=1")
     env = YAML.load(res.body)
     env["REQUEST_METHOD"].should.equal "GET"
     env["QUERY_STRING"].should.include "baz=2"
-    env["QUERY_STRING"].should.include "foo[bar]=1"
+    env["QUERY_STRING"].should.include "foo.bar=1"
     env["PATH_INFO"].should.equal "/foo"
     env["mock.postdata"].should.equal ""
   end
@@ -171,7 +171,7 @@ describe Rack::MockRequest do
     env["QUERY_STRING"].should.equal ""
     env["PATH_INFO"].should.equal "/foo"
     env["CONTENT_TYPE"].should.equal "application/x-www-form-urlencoded"
-    env["mock.postdata"].should.equal "foo[bar]=1"
+    env["mock.postdata"].should.equal "foo.bar=1"
   end
 
   should "accept raw input in params for POST requests" do

@@ -48,13 +48,14 @@ module Rack
         @flattened_params ||= begin
           h = Hash.new
           @params.each do |key, value|
-            k = @first ? key.to_s : "[#{key}]"
+            k = @first ? key.to_s : ".#{key}"
 
             case value
             when Array
               value.map { |v|
                 Multipart.build_multipart(v, false).each { |subkey, subvalue|
-                  h["#{k}[]#{subkey}"] = subvalue
+                  flat_key = "#{k}..#{subkey}".gsub(/\.{3}/, '..')
+                  h[flat_key] = subvalue
                 }
               }
             when Hash

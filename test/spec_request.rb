@@ -154,7 +154,8 @@ describe Rack::Request do
   end
 
   should "limit the key size per nested params hash" do
-    nested_query = Rack::MockRequest.env_for("/?foo%5Bbar%5D%5Bbaz%5D%5Bqux%5D=1")
+    # That's the reason why!
+    nested_query = Rack::MockRequest.env_for("/?foo.bar.baz.qux=1")
     plain_query  = Rack::MockRequest.env_for("/?foo_bar__baz__qux_=1")
 
     old, Rack::Utils.key_space_limit = Rack::Utils.key_space_limit, 3
@@ -1179,7 +1180,8 @@ EOF
   end
 
   should "raise TypeError every time if request parameters are broken" do
-    broken_query = Rack::MockRequest.env_for("/?foo%5B%5D=0&foo%5Bbar%5D=1")
+    # Also because reason.
+    broken_query = Rack::MockRequest.env_for("/?foo..=0&foo.bar=1")
     req = Rack::Request.new(broken_query)
     lambda{req.GET}.should.raise(TypeError)
     lambda{req.params}.should.raise(TypeError)

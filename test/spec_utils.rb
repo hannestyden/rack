@@ -162,65 +162,65 @@ describe Rack::Utils do
     Rack::Utils.parse_nested_query("a=b&pid%3D1234=1023").
       should.equal "pid=1234" => "1023", "a" => "b"
 
-    Rack::Utils.parse_nested_query("foo[]").
+    Rack::Utils.parse_nested_query("foo..").
       should.equal "foo" => [nil]
-    Rack::Utils.parse_nested_query("foo[]=").
+    Rack::Utils.parse_nested_query("foo..=").
       should.equal "foo" => [""]
-    Rack::Utils.parse_nested_query("foo[]=bar").
+    Rack::Utils.parse_nested_query("foo..=bar").
       should.equal "foo" => ["bar"]
-    Rack::Utils.parse_nested_query("foo[]=bar&foo").
+    Rack::Utils.parse_nested_query("foo..=bar&foo").
       should.equal "foo" => nil
-    Rack::Utils.parse_nested_query("foo[]=bar&foo[").
+    Rack::Utils.parse_nested_query("foo..=bar&foo[").
       should.equal "foo" => ["bar"], "foo[" => nil
-    Rack::Utils.parse_nested_query("foo[]=bar&foo[=baz").
+    Rack::Utils.parse_nested_query("foo..=bar&foo[=baz").
       should.equal "foo" => ["bar"], "foo[" => "baz"
-    Rack::Utils.parse_nested_query("foo[]=bar&foo[]").
+    Rack::Utils.parse_nested_query("foo..=bar&foo..").
       should.equal "foo" => ["bar", nil]
-    Rack::Utils.parse_nested_query("foo[]=bar&foo[]=").
+    Rack::Utils.parse_nested_query("foo..=bar&foo..=").
       should.equal "foo" => ["bar", ""]
 
-    Rack::Utils.parse_nested_query("foo[]=1&foo[]=2").
+    Rack::Utils.parse_nested_query("foo..=1&foo..=2").
       should.equal "foo" => ["1", "2"]
-    Rack::Utils.parse_nested_query("foo=bar&baz[]=1&baz[]=2&baz[]=3").
+    Rack::Utils.parse_nested_query("foo=bar&baz..=1&baz..=2&baz..=3").
       should.equal "foo" => "bar", "baz" => ["1", "2", "3"]
-    Rack::Utils.parse_nested_query("foo[]=bar&baz[]=1&baz[]=2&baz[]=3").
+    Rack::Utils.parse_nested_query("foo..=bar&baz..=1&baz..=2&baz..=3").
       should.equal "foo" => ["bar"], "baz" => ["1", "2", "3"]
 
-    Rack::Utils.parse_nested_query("x[y][z]=1").
+    Rack::Utils.parse_nested_query("x.y.z=1").
       should.equal "x" => {"y" => {"z" => "1"}}
-    Rack::Utils.parse_nested_query("x[y][z][]=1").
+    Rack::Utils.parse_nested_query("x.y.z..=1").
       should.equal "x" => {"y" => {"z" => ["1"]}}
-    Rack::Utils.parse_nested_query("x[y][z]=1&x[y][z]=2").
+    Rack::Utils.parse_nested_query("x.y.z=1&x.y.z=2").
       should.equal "x" => {"y" => {"z" => "2"}}
-    Rack::Utils.parse_nested_query("x[y][z][]=1&x[y][z][]=2").
+    Rack::Utils.parse_nested_query("x.y.z..=1&x.y.z..=2").
       should.equal "x" => {"y" => {"z" => ["1", "2"]}}
 
-    Rack::Utils.parse_nested_query("x[y][][z]=1").
+    Rack::Utils.parse_nested_query("x.y..z=1").
       should.equal "x" => {"y" => [{"z" => "1"}]}
-    Rack::Utils.parse_nested_query("x[y][][z][]=1").
+    Rack::Utils.parse_nested_query("x.y..z..=1").
       should.equal "x" => {"y" => [{"z" => ["1"]}]}
-    Rack::Utils.parse_nested_query("x[y][][z]=1&x[y][][w]=2").
+    Rack::Utils.parse_nested_query("x.y..z=1&x.y..w=2").
       should.equal "x" => {"y" => [{"z" => "1", "w" => "2"}]}
 
-    Rack::Utils.parse_nested_query("x[y][][v][w]=1").
+    Rack::Utils.parse_nested_query("x.y..v.w=1").
       should.equal "x" => {"y" => [{"v" => {"w" => "1"}}]}
-    Rack::Utils.parse_nested_query("x[y][][z]=1&x[y][][v][w]=2").
+    Rack::Utils.parse_nested_query("x.y..z=1&x.y..v.w=2").
       should.equal "x" => {"y" => [{"z" => "1", "v" => {"w" => "2"}}]}
 
-    Rack::Utils.parse_nested_query("x[y][][z]=1&x[y][][z]=2").
+    Rack::Utils.parse_nested_query("x.y..z=1&x.y..z=2").
       should.equal "x" => {"y" => [{"z" => "1"}, {"z" => "2"}]}
-    Rack::Utils.parse_nested_query("x[y][][z]=1&x[y][][w]=a&x[y][][z]=2&x[y][][w]=3").
+    Rack::Utils.parse_nested_query("x.y..z=1&x.y..w=a&x.y..z=2&x.y..w=3").
       should.equal "x" => {"y" => [{"z" => "1", "w" => "a"}, {"z" => "2", "w" => "3"}]}
 
-    lambda { Rack::Utils.parse_nested_query("x[y]=1&x[y]z=2") }.
+    lambda { Rack::Utils.parse_nested_query("x.y=1&x.y.z=2") }.
       should.raise(Rack::Utils::ParameterTypeError).
       message.should.equal "expected Hash (got String) for param `y'"
 
-    lambda { Rack::Utils.parse_nested_query("x[y]=1&x[]=1") }.
+    lambda { Rack::Utils.parse_nested_query("x.y=1&x..=1") }.
       should.raise(Rack::Utils::ParameterTypeError).
-      message.should.match(/expected Array \(got [^)]*\) for param `x'/)
+      message.should.equal "expected Array (got Rack::Utils::KeySpaceConstrainedParams) for param `x'"
 
-    lambda { Rack::Utils.parse_nested_query("x[y]=1&x[y][][w]=2") }.
+    lambda { Rack::Utils.parse_nested_query("x.y=1&x.y..w=2") }.
       should.raise(Rack::Utils::ParameterTypeError).
       message.should.equal "expected Array (got String) for param `y'"
 
@@ -254,11 +254,11 @@ describe Rack::Utils do
       should.be equal_query_to("my+weird+field=q1%212%22%27w%245%267%2Fz8%29%3F")
 
     Rack::Utils.build_nested_query("foo" => [nil]).
-      should.equal "foo[]"
+      should.equal "foo.."
     Rack::Utils.build_nested_query("foo" => [""]).
-      should.equal "foo[]="
+      should.equal "foo..="
     Rack::Utils.build_nested_query("foo" => ["bar"]).
-      should.equal "foo[]=bar"
+      should.equal "foo..=bar"
     Rack::Utils.build_nested_query('foo' => []).
       should.equal ''
     Rack::Utils.build_nested_query('foo' => {}).
@@ -271,7 +271,8 @@ describe Rack::Utils do
     # The ordering of the output query string is unpredictable with 1.8's
     # unordered hash. Test that build_nested_query performs the inverse
     # function of parse_nested_query.
-    [{"foo" => nil, "bar" => ""},
+    [
+      {"foo" => nil, "bar" => ""},
       {"foo" => "bar", "baz" => ""},
       {"foo" => ["1", "2"]},
       {"foo" => "bar", "baz" => ["1", "2", "3"]},
